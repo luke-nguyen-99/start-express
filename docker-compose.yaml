@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+  app:
+    image: express:v1
+    ports:
+      - 3000:3000
+    command: npm run dev
+  db:
+    image: mongo
+    ports:
+      - 27017:27017
