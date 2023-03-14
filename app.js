@@ -1,11 +1,10 @@
+require("dotenv").config({ path: "./.env" });
 const express = require("express");
-const path = require('path');
-const connectDatabase = require('./config/connection');
-const mongoose = require('mongoose');
+const path = require("path");
+const { db } = require("./config/connection");
 
 const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
-require("dotenv").config({ path: "./.env" }); 
+app.use(express.static(path.join(__dirname, "public")));
 
 const port = process.env.PORT || 3000;
 
@@ -13,51 +12,49 @@ const port = process.env.PORT || 3000;
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
-app.use('/user', [require('./routes/user.router')]);
-connectDatabase();
-mongoose.connection.once('open', () => {
-  console.log('Connected to mongo db');
+app.use("/user", [require("./routes/user.router")]);
 
-  // Start the server
-  app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+db.sequelize
+  .sync()
+  .then(() => {
+    console.log("Connected db.");
+    // Start the server
+    app.listen(port, () => {
+      console.log(`Server is listening on port ${port}`);
+    });
+    app.on("error", onError);
+    app.on("listening", onListening);
+  })
+  .catch((err) => {
+    console.log("Failed to connect db: " + err.message);
   });
-  app.on('error', onError);
-  app.on('listening', onListening);
-});
-
-
 
 // event listener for HTTP server "error" event.
 function onError(error) {
-    if (error.syscall !== 'listen') {
+  if (error.syscall !== "listen") {
+    throw error;
+  }
+
+  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
+      process.exit(1);
+      break;
+    default:
       throw error;
-    }
-  
-    var bind = typeof port === 'string'
-      ? 'Pipe ' + port
-      : 'Port ' + port;
-  
-    // handle specific listen errors with friendly messages
-    switch (error.code) {
-      case 'EACCES':
-        console.error(bind + ' requires elevated privileges');
-        process.exit(1);
-        break;
-      case 'EADDRINUSE':
-        console.error(bind + ' is already in use');
-        process.exit(1);
-        break;
-      default:
-        throw error;
-    }
   }
-  
-  // event listener for HTTP server "listening" event
-  function onListening() {
-    var addr = server.address();
-    var bind = typeof addr === 'string'
-      ? 'pipe ' + addr
-      : 'port ' + addr.port;
-    debug('Listening on ' + bind);
-  }
+}
+
+// event listener for HTTP server "listening" event
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  debug("Listening on " + bind);
+}

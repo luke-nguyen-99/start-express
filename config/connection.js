@@ -1,13 +1,21 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 
-const connectDatabase = async () => {
-    try {
-        // mongoose.set('strictQuery', false);
-        mongoose.connect(process.env.MONGO_CONNECTION_STRING + process.env.MONGO_DATABASE_NAME);
+const sequelize = new Sequelize(
+    process.env.POSTGRES_DATABASE,
+    process.env.POSTGRES_USERNAME,
+    process.env.POSTGRES_PASSWORD,
+    {
+        dialect: process.env.POSTGRES_TYPE,
+        host: process.env.POSTGRES_HOST,
+        port: parseInt(process.env.POSTGRES_PORT, 10),
+    },
+);
 
-    } catch (err) {
-        console.log(err);
-    }
-}
+const db = {};
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
 
-module.exports = connectDatabase; 
+db.tutorials = require('../database/User')(sequelize, Sequelize);
+
+//exporting the module
+module.exports = { db, sequelize };

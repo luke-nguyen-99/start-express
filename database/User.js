@@ -1,19 +1,12 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+module.exports = (sequelize, Sequelize) => {
+  const User = sequelize.define("User", {
+    name: { type: Sequelize.STRING, allowNull: false },
+    username: { type: Sequelize.STRING, unique: true },
+    password: { type: Sequelize.TEXT, select: false }
+  }, {
+    defaultScope: { attributes: { exclude: ['password'] } }
+  });
 
+  return User;
+};
 
-const userSchema = new Schema(
-    {
-        name: String,
-        username: !String,
-        password: !String,
-        role: !String,
-        age: Number,
-        address: String,
-    }, 
-    { 
-        collection: 'user' 
-    }
-);
-
-module.exports = mongoose.model('user', userSchema);
