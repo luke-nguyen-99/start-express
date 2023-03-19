@@ -1,19 +1,40 @@
 require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const path = require("path");
-const { db } = require("./config/connection");
+const db = require("./config/connection");
+const bodyParser = require('body-parser');
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 app.use(express.static(path.join(__dirname, "public")));
 
 const port = process.env.PORT || 3000;
+app.use(bodyParser.json({ limit: '25mb' }));
+app.use(bodyParser.urlencoded());
 
 // Route to handle incoming requests
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
-app.use("/user", [require("./routes/user.router")]);
+app.use("/user", [require("./routes/user.route")]);
 
+//swagger
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Express API with Swagger',
+      version: '1.0.0',
+      description: 'A sample API using Swagger and Express',
+    },
+  },
+  apis: ['./routes/*.route.js'],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 db.sequelize
   .sync()
   .then(() => {
