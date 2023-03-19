@@ -1,7 +1,6 @@
 const express = require("express");
 const path = require('path');
-const connectDatabase = require('./config/connection');
-const mongoose = require('mongoose');
+const db = require('./config/connection');
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -14,7 +13,8 @@ app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
 app.use('/user', [require('./routes/user.router')]);
-connectDatabase();
+
+db.connect.sync
 mongoose.connection.once('open', () => {
   console.log('Connected to mongo db');
 
