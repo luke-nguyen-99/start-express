@@ -19,6 +19,7 @@ app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
 app.use("/user", [require("./routes/user.route")]);
+app.use('/upload', [require('./routes/upload.route')]);
 
 //swagger
 const swaggerOptions = {
